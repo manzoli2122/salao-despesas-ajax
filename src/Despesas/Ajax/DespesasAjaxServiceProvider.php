@@ -43,7 +43,7 @@ class DespesasAjaxServiceProvider extends ServiceProvider
     private function mergeConfig()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/config.php', 'despesasAjax'
+            __DIR__.'/../../config/config.php', 'despesasAjax'
         );
     }
 
