@@ -9,7 +9,7 @@ use Config;
 
 class Despesa extends Model
 {
-
+    
     use SoftDeletes;
 
     public function newInstance($attributes = [], $exists = false)
