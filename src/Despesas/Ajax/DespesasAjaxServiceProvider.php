@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 class DespesasAjaxServiceProvider extends ServiceProvider
 {
 
- 
     protected $defer = false;
     protected $namespace = 'Manzoli2122\Salao\Despesas\Ajax\Http\Controllers'  ;
     
