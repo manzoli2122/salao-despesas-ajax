@@ -1,70 +1,79 @@
-@extends( Config::get('app.templateMaster' , 'templates.templateMaster')  )
+@extends( Config::get('app.templateMasterJson' , 'templates.templateMasterJson')  )
 
-@section( Config::get('app.templateMasterContentTitulo' , 'titulo-page')  )			
-	Listagem dos Funcionarios						
-@endsection
-
-@push( Config::get('app.templateMasterCss' , 'css')  )			
-	<style type="text/css">
-		.btn-group-sm>.btn, .btn-sm {
-			padding: 1px 10px;
-			font-size: 15px;		
-		} 
-		.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-			padding: 5.5px;
-		}
-	</style>
-@endpush
-
-@section( Config::get('app.templateMasterContent' , 'contentMaster')  )
-			
-	<div class="col-xs-12">
-		<div class="box box-success">
-			<div class="box-body" style="padding-top: 5px; padding-bottom: 3px;">
-				<table class="table table-hover table-striped">
-					<tr>
-						<th>Nome</th>
-						<th></th>
-						<th>Adiantamento</th>
-						<th>Salário</th>
-					</tr>
-					@forelse($models as $model)		
-						<tr>
-							<td> {{$model->name}} </td>	
-							<td>
-								@permissao('funcionarios')								
-									<a class="btn btn-success btn-sm" href='{{route("funcionarios.show", $model->id)}}'>
-										<i class="fa fa-eye" aria-hidden="true"></i>Exibir</a>								
-								@endpermissao							
-							</td>
-							<td>
-								@permissao('adiantamento-cadastrar')
-									<a class="btn btn-warning btn-sm" data-toggle="modal" data-target="#adiantamentoModal{{$model->id}}">
-										<i class="fa fa-plus" aria-hidden="true"></i>
-										Cadastrar  
-									</a>
-								@endpermissao											
-							</td>
-							<td>
-								@permissao('salario-cadastrar')
-									<a class="btn btn-info btn-sm" data-toggle="modal" data-target="#salarioModal{{$model->id}}">
-										<i class="fa fa-plus" aria-hidden="true"></i>
-										Cadastrar  
-									</a>
-								@endpermissao											
-							</td>
-						</tr>
-					@empty									
-					@endforelse
-				</table>			
+@section( Config::get('app.templateMasterContent' , 'content')  )
+<section class="content-header">
+	<h1>
+		<span id="div-titulo-pagina">Listagem dos Funcionarios </span>		
+	</h1>
+</section>	
+<section class="content">
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="box box-success">
+				<div class="box-body" style="padding-top: 5px; padding-bottom: 3px;">
+					<table class="table table-bordered table-striped table-hover" id="datatable">
+						<thead>	
+							<tr>
+								<th style="max-width:20px">ID</th>
+								<th pesquisavel>Nome</th>								
+								<th class="align-center" style="width:140px">Ações</th>
+							</tr>
+						</thead>
+					</table>	
+				</div>
 			</div>
 		</div>
 	</div>
+</section>
 
-	@forelse($models as $model)	
-		@include('despesas::funcionarios.modalAdiantamento')
-		@include('despesas::funcionarios.modalSalario')
-	@empty									
-	@endforelse
 								
 @endsection
+
+
+
+@push(Config::get('app.templateMasterScript' , 'script') )
+	
+	<script src="{{ mix('js/datatables-padrao.js') }}" type="text/javascript"></script>
+
+	<script>
+
+		var pagianIndex = document.getElementById("div-pagina").innerHTML;		
+		function modelIndexDataTableFunction() {
+			var dataTable = datatablePadrao('#datatable', {
+				order: [[ 1, "asc" ]],
+				ajax: { 
+					url:'{{ route('funcionarios.ajax.getDatatable') }}'
+				},
+				columns: [
+					{ data: 'id', name: 'id' },
+					{ data: 'name', name: 'name' },					
+					{ data: 'action', name: 'action', orderable: false, searchable: false, class: 'align-center'}
+				],
+			});
+	
+			dataTable.on('draw', function () {
+				
+
+				$('[btn-show]').click(function (){					
+					modelShow($(this).data('id'), "{{ route('funcionarios.ajax.index') }}",
+						function(data){							
+							document.getElementById("div-pagina").innerHTML = data ;						
+						}
+					);                 
+				});
+
+				
+
+			});
+
+		}
+
+
+		$(document).ready(function() {
+			modelIndexDataTableFunction();
+		});
+	</script>
+
+
+
+@endpush

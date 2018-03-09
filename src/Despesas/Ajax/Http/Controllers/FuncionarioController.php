@@ -2,56 +2,86 @@
 
 namespace Manzoli2122\Salao\Despesas\Ajax\Http\Controllers;
 
-use Manzoli2122\Salao\Cadastro\Ajax\Http\Controllers\Padroes\Controller ;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use DataTables;
+
+use Manzoli2122\Pacotes\Http\Controller\DataTable\Json\DataTableJsonController ;
+
 use Manzoli2122\Salao\Despesas\Ajax\Models\Adiantamento;
 use Manzoli2122\Salao\Despesas\Ajax\Models\Funcionario;
 use Manzoli2122\Salao\Despesas\Ajax\Models\Salario;
-use Illuminate\Http\Request;
 
 use ChannelLog as Log;
 
-class FuncionarioController extends Controller
-{
+class FuncionarioController extends DataTableJsonController{
+
+
+    //use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+
 
     protected $model;
     protected $adiantamento;
     protected $name = "Funcioanrios";
-    protected $view = "despesas::funcionarios";
-    protected $route = "funcionarios";
+    protected $view = "despesasAjax::funcionarios";
+    protected $route = "funcionarios.ajax";
     protected $logCannel;
+
+
 
 
     public function __construct(Funcionario $funcionario, Adiantamento $adiantamento){
         $this->model = $funcionario; 
-
         $this->logCannel = 'despesas';
-
         $this->adiantamento = $adiantamento;        
         $this->middleware('auth');
-
     }
 
 
 
-    public function index()
-    {
+
+    /**
+    * Processa a requisição AJAX do DataTable na página de listagem.
+    * Mais informações em: http://datatables.yajrabox.com
+    *
+    * @return \Illuminate\Http\JsonResponse
+    */
+    public function getDatatable(){
+        $models = $this->model->getDatatable();
+        return Datatables::of($models)
+            ->addColumn('action', function($linha) {
+                return  '<button data-id="'.$linha->id.'" type="button" class="btn btn-primary btn-xs btn-datatable" btn-show    title="Visualizar" style="margin-left: 10px;"> <i class="fa fa-search"></i> </button>' ;
+            })->make(true);
+    }
+
+
+/*
+    public function index(){
+
         $models = $this->model::ativo()->get();
         return view("{$this->view}.index", compact('models', 'title'));
+
     }
 
+*/
 
-
+/*
     
-    public function show($id)
-    {
+    public function show($id){
+
         $title = "Visualizando {$this->name}";
         $model = $this->model->ativo()->find($id);
         if($model)
             return view("{$this->view}.show", compact('model'));
         return redirect()->route("{$this->route}.index");
+
     }
 
-
+*/
 
 
 
