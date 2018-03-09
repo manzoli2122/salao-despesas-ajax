@@ -3,71 +3,55 @@
 namespace Manzoli2122\Salao\Despesas\Ajax\Http\Controllers;
 
 use Manzoli2122\Salao\Despesas\Ajax\Models\Despesa;
-use Illuminate\Http\Request;
-use Manzoli2122\Salao\Cadastro\Ajax\Http\Controllers\Padroes\SoftDeleteController ;
-use ChannelLog as Log;
+use Manzoli2122\Pacotes\Http\Controller\DataTable\Json\DataTableJsonController ;
 
-class DespesaController extends SoftDeleteController
+class DespesaController extends DataTableJsonController
 {
 
-    
 
     protected $model;
     protected $name = "Despesas";
-    protected $view = "despesas::despesas";
-    protected $view_apagados = "despesas::despesas.apagados";
-    protected $route = "despesas";
+    protected $view = "despesasAjax::despesas";
+    protected $route = "despesas.ajax";
 
-    //protected $logCannel = 'audit' ;
-
-
-    public function __construct(Despesa $despesa  ){
+    public function __construct( Despesa $despesa  ){
         $this->model = $despesa;       
         $this->middleware('auth');
-
-        $this->logCannel = 'despesas';
 
         $this->middleware('permissao:despesas')->only([ 'index' , 'show'  ]) ;        
         $this->middleware('permissao:despesas-cadastrar')->only([ 'create' , 'store']);
         $this->middleware('permissao:despesas-editar')->only([ 'edit' , 'update']);
-        $this->middleware('permissao:despesas-soft-delete')->only([ 'destroySoft' ]);
-        $this->middleware('permissao:despesas-restore')->only([ 'restore' ]);
-        $this->middleware('permissao:despesas-admin-permanete-delete')->only([ 'destroy' ]);
-        $this->middleware('permissao:despesas-apagados')->only([ 'indexApagados' , 'showApagado' ]) ;
-                   
+        $this->middleware('permissao:despesas-soft-delete')->only([ 'destroy' ]);
+        
+    }   
 
 
-    }
-    
 
-    // NÃO EXCLUI SALARIO OU ADIANTAMENTO JA CALCULADO NO SALARIO.
-    public function destroySoft($id)
-    {
-        try {            
-            $model = $this->model->find($id);
+    public function destroy($id){
+        try {
+            
+            if(!$model = $this->model->findModelJson($id) ){
+                $msg = __('msg.erro_nao_encontrado', ['1' =>  $this->name ]);
+                return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
+            }  
+
             if($model->salario_id == '' and  $model->tipo <> 'salario'){
                 $delete = $model->delete();                   
-                $msg = __('msg.sucesso_excluido', ['1' => $this->name ]);
-                $msg2 =  "DELETEs - " . $this->name . ' apagado(a) com sucesso !! ' . $model . ' responsavel: ' . session('users') ;
-                Log::write( $this->logCannel , $msg2  );  
+                $msg = __('msg.sucesso_excluido', ['1' =>  $this->name ]); 
             }
             else{
                 $erro = true;
                 $msg = __('msg.erro_salario_cadastrado');
             }
-            
-        } 
-        catch(\Illuminate\Database\QueryException $e) 
-        {
+
+        } catch(\Illuminate\Database\QueryException $e) {
             $erro = true;
             $msg = $e->errorInfo[1] == ErrosSQL::DELETE_OR_UPDATE_A_PARENT_ROW ? 
-                __('msg.erro_exclusao_fk', ['1' => $this->name , '2' => 'Model']):
+                __('msg.erro_exclusao_fk', ['1' =>  $this->name  , '2' => 'Model']):
                 __('msg.erro_bd');
         }
-        return response()->json(['erro' => isset($erro), 'msg' => $msg], 200);
-
+        return response()->json(['erro' => isset($erro), 'msg' => $msg , 'data' => null  ], 200);
     }
-
 
 
 
