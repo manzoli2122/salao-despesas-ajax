@@ -15,7 +15,7 @@ class DespesasAjaxServiceProvider extends ServiceProvider
         // Publish config files
         $this->publishes([
             __DIR__.'/../../config/config.php' =>  config_path('despesasAjax.php'), 
-        ], 'despesasAjax\_config');
+        ], 'despesasAjax_config');
         $this->mapWebRoutes();     
         $this->loadViewsFrom(__DIR__.'/Views', 'despesasAjax');
     }
