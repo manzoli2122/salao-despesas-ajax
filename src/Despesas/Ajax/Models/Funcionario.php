@@ -89,12 +89,12 @@ class Funcionario extends Model {
 
 
     public function salarios(){        
-        return $this->hasMany('Manzoli2122\Salao\Despesas\Models\Salario', 'funcionario_id');
+        return $this->hasMany('Manzoli2122\Salao\Despesas\Ajax\Models\Salario', 'funcionario_id');
     }
 
 
     public function adiantamentos(){        
-        return $this->hasMany('Manzoli2122\Salao\Despesas\Models\Adiantamento', 'funcionario_id');
+        return $this->hasMany('Manzoli2122\Salao\Despesas\Ajax\Models\Adiantamento', 'funcionario_id');
     }
 
 
@@ -114,14 +114,14 @@ class Funcionario extends Model {
 
 
     public function Atendimentos(){
-        return $this->hasMany('Manzoli2122\Salao\Atendimento\Models\AtendimentoFuncionario', 'funcionario_id');
+        return $this->hasMany('Manzoli2122\Salao\Atendimento\Ajax\Models\AtendimentoFuncionario', 'funcionario_id');
        
     }
 
 
 
     public function AtendimentosSemSalario(){
-        return $this->hasMany('Manzoli2122\Salao\Atendimento\Models\AtendimentoFuncionario', 'funcionario_id')->whereNull('salario_id')->get();
+        return $this->hasMany('Manzoli2122\Salao\Atendimento\Ajax\Models\AtendimentoFuncionario', 'funcionario_id')->whereNull('salario_id')->get();
         //return $this->whereNull('salario_id')->where('funcionario_id' , $funcionarioId)->get();
     }
 
@@ -150,7 +150,7 @@ class Funcionario extends Model {
 
 
     public function AdiantamentosSemSalario() {
-        return $this->hasMany('Manzoli2122\Salao\Despesas\Models\Adiantamento', 'funcionario_id')->whereNull('salario_id')->orderBy('created_at', 'asc')->get();
+        return $this->hasMany('Manzoli2122\Salao\Despesas\Ajax\Models\Adiantamento', 'funcionario_id')->whereNull('salario_id')->orderBy('created_at', 'asc')->get();
     }
 
 

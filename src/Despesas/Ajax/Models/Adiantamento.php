@@ -45,13 +45,13 @@ class Adiantamento extends Model
 
     public function funcionario()
     {
-        return $this->belongsTo('Manzoli2122\Salao\Despesas\Models\Funcionario', 'funcionario_id');
+        return $this->belongsTo('Manzoli2122\Salao\Despesas\Ajax\Models\Funcionario', 'funcionario_id');
     }
 
 
     public function salario()
     {        
-        return $this->belongsTo('Manzoli2122\Salao\Despesas\Models\Salario', 'salario_id');
+        return $this->belongsTo('Manzoli2122\Salao\Despesas\Ajax\Models\Salario', 'salario_id');
     }
 
 

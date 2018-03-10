@@ -17,7 +17,7 @@ use Manzoli2122\Salao\Despesas\Ajax\Models\Salario;
 
 use ChannelLog as Log;
 
-class FuncionarioController extends DataTableJsonController{
+class FuncionarioController extends DataTableJsonController  {
 
 
     //use AuthorizesRequests, DispatchesJobs, ValidatesRequests;

@@ -39,13 +39,13 @@ class Salario extends Model
 
     public function funcionario()
     {
-        return $this->belongsTo('Manzoli2122\Salao\Despesas\Models\Funcionario', 'funcionario_id');
+        return $this->belongsTo('Manzoli2122\Salao\Despesas\Ajax\Models\Funcionario', 'funcionario_id');
     }
 
 
     public function servicos()
     {        
-        return $this->hasMany('Manzoli2122\Salao\Atendimento\Models\AtendimentoFuncionario', 'salario_id');
+        return $this->hasMany('Manzoli2122\Salao\Atendimento\Ajax\Models\AtendimentoFuncionario', 'salario_id');
     }
 
 
