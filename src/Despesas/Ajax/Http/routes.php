@@ -26,13 +26,11 @@ Route::group(['prefix' => 'gastos/ajax', 'middleware' => 'auth' ], function(){
         Route::get('funcionarios', 'FuncionarioController@index')->name('funcionarios.ajax.index');
         Route::get('funcionarios/{id}', 'FuncionarioController@show')->name('funcionarios.ajax.show');
 
+        Route::post('funcionario/salarios/cadastrar/{id}', 'FuncionarioController@storeSalario')->name('salario.ajax.cadastrar');
+        Route::post('funcionarios/salario/{id}', 'FuncionarioController@salario')->name('funcionarios.ajax.salario');
 
-        //Route::post('funcionario/{id}/salarios/cadastrar', 'FuncionarioController@storeSalario')->name('salario.store');
-        
-        //
-        //Route::post('funcionarios/{id}/adiantamentos/cadastrar', 'FuncionarioController@storeAdiantamento')->name('adiantamento.store');
-        //Route::get('funcionarios/{id}', 'FuncionarioController@show')->name('funcionarios.show');
-        
-      
+        Route::post('funcionarios/adiantamentos/cadastrar/{id}', 'FuncionarioController@storeAdiantamento')->name('adiantamento.ajax.cadastrar');
+        Route::post('funcionarios/adiantamentos/{id}', 'FuncionarioController@adiantamento')->name('funcionarios.ajax.adiantamento');
+    
 
     });

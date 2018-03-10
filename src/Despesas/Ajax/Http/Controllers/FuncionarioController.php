@@ -8,7 +8,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use DataTables;
-
+use View;
 use Manzoli2122\Pacotes\Http\Controller\DataTable\Json\DataTableJsonController ;
 
 use Manzoli2122\Salao\Despesas\Ajax\Models\Adiantamento;
@@ -59,43 +59,58 @@ class FuncionarioController extends DataTableJsonController{
     }
 
 
-/*
-    public function index(){
 
-        $models = $this->model::ativo()->get();
-        return view("{$this->view}.index", compact('models', 'title'));
 
-    }
 
-*/
 
-/*
-    
-    public function show($id){
-
-        $title = "Visualizando {$this->name}";
-        $model = $this->model->ativo()->find($id);
-        if($model)
-            return view("{$this->view}.show", compact('model'));
-        return redirect()->route("{$this->route}.index");
-
-    }
-
-*/
 
 
 
 
     public function storeAdiantamento(Request $request, $id)
     {         
-        $dataForm = $request->all();              
+        $dataForm = $request->all();  
+
         $insert = $this->adiantamento->create($dataForm); 
 
         $msg =  "CREATEs - " . 'Adiantamento Cadastrado(a) com sucesso !! ' . $insert . ' responsavel: ' . session('users') ;
         Log::write( $this->logCannel , $msg  ); 
 
-        return redirect()->route("{$this->route}.show", ['id' => $id]);   
+        return response()->json(['erro' => false , 'msg' =>'' , 'data' => null  ], 200);   
     }
+
+
+
+
+
+
+
+
+    public function adiantamento($id){    
+        try {            
+            if(!$model = $this->model->findModelJson($id) ){
+                $msg = __('msg.erro_nao_encontrado', ['1' =>  $this->name ]);
+                return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
+            } 
+            
+            $html = (string) View::make("{$this->view}.adiantamento", compact("model"));            
+            $html =  preg_replace( '/\r/' , '', $html)  ; 
+            $html =  preg_replace( '/\n/' , '', $html)  ;
+            $html =  preg_replace( '/\t/' , '', $html)  ;  
+            $html =  preg_replace( '/(>)(\s+)(<)/' , '\1\3', $html)  ; 
+            return response()->json(['erro' => false , 'msg' =>'' , 'data' => $html   ], 200);  
+           
+        } catch(\Illuminate\Database\QueryException $e) {
+            $msg = $e->errorInfo[1] == ErrosSQL::DELETE_OR_UPDATE_A_PARENT_ROW ? 
+                __('msg.erro_exclusao_fk', ['1' =>  $this->name  , '2' => 'Model']):
+                __('msg.erro_bd');
+            return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
+        }
+    }
+
+
+
+
 
 
 
@@ -103,47 +118,82 @@ class FuncionarioController extends DataTableJsonController{
 
     
     public function storeSalario($id)
-    {        
-        $funcionario = Funcionario::find($id);
-        if($funcionario->valorSalarioLiquido()<=0){
-            return  redirect()->route("funcionarios.show",['id' => $id]);
-        }
-
-        //$valor = 0.0;
+    {      
         
-        $salario = new Salario();
-        $salario->funcionario()->associate($funcionario);
-        $salario->valor =  $funcionario->valorSalarioLiquido() ;
-        $salario->tipo = 'salario';
-        $salario->descricao = $funcionario->name;
-        $salario->save();
+        try {    
 
-        foreach(   $funcionario->AtendimentosSemSalario() as $servico){
-            $servico->salario()->associate($salario);
-            $servico->save();
-            //$valor = $valor + (($servico->servico->valor - $servico->desconto) * ($servico->servico->porcentagem_funcionario / 100 )) ;
+            if( !$funcionario = Funcionario::find($id) ) {
+                $msg = __('msg.erro_nao_encontrado', ['1' =>  $this->name ]);
+                return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
+            } 
+
+            if($funcionario->valorSalarioLiquido()<=0){
+                return response()->json(['erro' => true , 'msg' => 'Funcionario com mais adiantamento do que a receber.' , 'data' => null ], 200);
+            }
+
+            $salario = new Salario();
+            $salario->funcionario()->associate($funcionario);
+            $salario->valor =  $funcionario->valorSalarioLiquido() ;
+            $salario->tipo = 'salario';
+            $salario->descricao = $funcionario->name;
+            $salario->save();
+    
+            foreach(   $funcionario->AtendimentosSemSalario() as $servico){
+                $servico->salario()->associate($salario);
+                $servico->save();
+            }
+
+
+            foreach(  $funcionario->AdiantamentosSemSalario() as $adiantamento){
+                $adiantamento->salario()->associate($salario);
+                $adiantamento->save();
+            }
+
+            $msg =  "CREATEs - " . 'Salario Cadastrado(a) com sucesso !! ' . $salario . ' responsavel: ' . session('users') ;
+            $model = $funcionario ;
+            $html = (string) View::make("{$this->view}.show", compact("model"));            
+            $html =  preg_replace( '/\r/' , '', $html)  ; 
+            $html =  preg_replace( '/\n/' , '', $html)  ;
+            $html =  preg_replace( '/\t/' , '', $html)  ;  
+            $html =  preg_replace( '/(>)(\s+)(<)/' , '\1\3', $html)  ; 
+
+            return response()->json(['erro' => false , 'msg' =>  $msg  , 'data' => $html   ], 200);  
+     
+        } catch(\Illuminate\Database\QueryException $e) {
+            $msg = $e->errorInfo[1] == ErrosSQL::DELETE_OR_UPDATE_A_PARENT_ROW ? 
+                __('msg.erro_exclusao_fk', ['1' =>  $this->name  , '2' => 'Model']):
+                __('msg.erro_bd');
+            return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
         }
 
-
-
-        foreach(  $funcionario->AdiantamentosSemSalario() as $adiantamento){
-            $adiantamento->salario()->associate($salario);
-            $adiantamento->save();
-            //$valor = $valor - $adiantamento->valor  ;
-        }
-
-
-
-        $msg =  "CREATEs - " . 'Salario Cadastrado(a) com sucesso !! ' . $salario . ' responsavel: ' . session('users') ;
-        Log::write( $this->logCannel , $msg  ); 
-       // $salario->valor =  $valor ;       
-       // $salario->save();
-
-       return redirect()->route("{$this->route}.show", ['id' => $id]);          
-       
         
     }
     
+
+
+
+    public function salario($id){    
+        try {            
+            if(!$model = $this->model->findModelJson($id) ){
+                $msg = __('msg.erro_nao_encontrado', ['1' =>  $this->name ]);
+                return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
+            } 
+            
+            $html = (string) View::make("{$this->view}.salario", compact("model"));            
+            $html =  preg_replace( '/\r/' , '', $html)  ; 
+            $html =  preg_replace( '/\n/' , '', $html)  ;
+            $html =  preg_replace( '/\t/' , '', $html)  ;  
+            $html =  preg_replace( '/(>)(\s+)(<)/' , '\1\3', $html)  ; 
+            return response()->json(['erro' => false , 'msg' =>'' , 'data' => $html   ], 200);  
+           
+        } catch(\Illuminate\Database\QueryException $e) {
+            $msg = $e->errorInfo[1] == ErrosSQL::DELETE_OR_UPDATE_A_PARENT_ROW ? 
+                __('msg.erro_exclusao_fk', ['1' =>  $this->name  , '2' => 'Model']):
+                __('msg.erro_bd');
+            return response()->json(['erro' => true , 'msg' => $msg , 'data' => null ], 200);
+        }
+    }
+
 
 
 }

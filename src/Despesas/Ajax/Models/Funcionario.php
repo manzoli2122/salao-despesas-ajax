@@ -156,8 +156,7 @@ class Funcionario extends Model {
 
 
     public function valorSalarioLiquido(){
-        $valor = $this->valorBrutoSalario()  - $this->valorAdiantamento();  
-        
+        $valor = $this->valorBrutoSalario()  - $this->valorAdiantamento();          
         return $valor;
     }
 

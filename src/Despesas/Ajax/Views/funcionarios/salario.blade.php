@@ -1,115 +1,158 @@
-@extends( Config::get('app.templateMaster' , 'templates.templateMaster')  )
-
-
-
-@section( Config::get('app.templateMasterContent' , 'contentMaster')  )
-	<section class="row text-center placeholders">
-        <div class="col-12 col-sm-12 placeholder">
-			<h4 style="text-align:center;"> Cadastro de Salário </h4>
-        </div>  
-		<div class="col-12 col-sm-12 placeholder">
-			<h5 style="text-align:center;">Funcionario: {{$funcionario->name}} </h5>
-        </div>  
-		
-		<div class="col-12 col-sm-12 placeholder">
-		<hr>
-			<h4 style="text-align:center;">Serviços Realizados</h4>
-        </div>  
-		
-
-
-
-
-
-		<div class="col-12 col-sm-12 placeholder">
-		<hr>
-			@forelse($servicos as $servico)
-
-				 <div class="row">	
-                    <div class="col-4 text-left">			
-                        <p><b>{{$servico->servico->nome}}  </b>    </p>						
-                        
-                    </div>
-					<div class="col-2 text-right">
-						{{-- Carbon\Carbon::parse($servico->created_at)->format('d/m/Y ') --}}			
-                        {{ $servico->created_at->format('d/m/Y')}}						
-                    </div>
-                    <div class="col-2 text-right">			
-                        <p> Valor R$ {{$servico->servico->valor - $servico->desconto  }} </p>						
-                    </div>
-					<div class="col-2 text-right">			
-                        <p> Porc. Funcionario {{$servico->servico->porcentagem_funcionario }}% </p>						
-                    </div>
-					<div class="col-2 text-right">			
-                        <p> Liquido R$ {{ number_format( ($servico->servico->valor - $servico->desconto) * ($servico->servico->porcentagem_funcionario / 100 )  , 2 ,',', '') }} </p>						
-                    </div>
+<section class="content-header">
+        <h1>
+            <span id="div-titulo-pagina">{{$model->name}}</span>
+            <small id="div-small-content-header" > {{$model->email}} </small>
+        </h1>
+    </section>			
+    <section class="content">
+        <div class="row">
+            <section class="text-center relatorio"> 
+                <div class="col-12 col-sm-12 comissoes" style="margin-bottom:10px; ">
+                    <div class="box">
+                        <div class="box-header">
+                            <h1 class="box-title">SERVIÇO A SEREM PAGOS </h1>
+                        </div>
+                        <div class="box-body no-padding">
+                            <table class="table table-condensed text-center table-striped">
+                                <thead>	
+                                    <tr>
+                                        <th style="max-width:20px">ID</th>
+                                        <th> Data </th>
+                                        <th> Nome </th>
+                                        <th> Cliente </th>	
+                                        <th> Valor Bruto </th>							
+                                        <th> Valor Liquido </th
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($model->AtendimentosSemSalario() as $atendimento)
+                                        <tr>
+                                            <td> {{$atendimento->id}} </td>								
+                                            <td> {{$atendimento->created_at->format('d/m/Y')}} </td>
+                                            <td> {{$atendimento->servico->nome}} </td>
+                                            <td> 
+                                                @if($atendimento->cliente->apelido!= '')
+                                                    {{$atendimento->cliente->apelido}}
+                                                @else 
+                                                    {{$atendimento->cliente->name}}
+                                                @endif 
+                                            </td>
+                                            <td> R$ {{number_format($atendimento->valor, 2 ,',' , '')}} </td>
+                                            <td> R$ {{number_format($atendimento->valorFuncioanrio(), 2 ,',' , '')}} </td>
+                                        </tr>
+                                    @empty
+                                    @endforelse 
+                                    <tr style="color:green ; font-size:20px;font-weight: bold;">
+                                        <td></td><td></td><td></td>
+                                        <td> TOTAL </td>
+                                        <td> R$ {{number_format($model->AtendimentosSemSalario()->sum('valor') , 2 ,',' , '')}} </td>
+                                        <td> R$ {{number_format( $model->valorBrutoSalario() , 2 ,',' , '')}} </td>
+                                    </tr>
+                                </tbody>					
+                            </table>
+                        </div>					
+                    </div>				 
                 </div>
-                
-                <hr>
-
-			@empty
-										
-					<p>Nenhum usuario encontrado</td>
-				
-			@endforelse
-        </div> 
-		
-
-
-
-
-
-
-		<div class="col-12 col-sm-12 placeholder">
-		<hr>
-			<h4 style="text-align:center;">Adiantamentos</h4>
-        </div>  
-		
-
-
-
-
-
-		<div class="col-12 col-sm-12 placeholder">
-		<hr>
-			@forelse($adiantamentos as $adiantamento)
-
-				 <div class="row">	
-                    <div class="col-4 text-left">			
-                        <p><b>{{ $adiantamento->descricao }}  </b>    </p>						
-                        
-                    </div>
-					<div class="col-4 text-right">
-						{{-- Carbon\Carbon::parse($servico->created_at)->format('d/m/Y ') --}}			
-                        {{ $adiantamento->created_at->format('d/m/Y')}}						
-                    </div>
-                    <div class="col-4 text-right">			
-                        <p> Valor R$ {{  number_format($adiantamento->valor  , 2 ,',', '')  }} </p>						
-                    </div>
-					
+            </section>	
+    
+    
+    
+    
+    
+    
+    
+            <section class="text-center relatorio"> 
+                <div class="col-12 col-sm-12 comissoes" style="margin-bottom:10px; ">
+                    <div class="box">
+                        <div class="box-header">
+                            <h1 class="box-title">ADIANTAMENTOS REALIZADOS </h1>
+                        </div>
+                        <div class="box-body no-padding">
+                            <table class="table table-condensed text-center table-striped">
+                                <thead>	
+                                    <tr>
+                                        <th style="max-width:20px">ID</th>
+                                        <th> Data </th>
+                                        <th> Descrição </th>
+                                        <th> Valor  </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($model->AdiantamentosSemSalario() as $adiantamento)
+                                        <tr>
+                                            <td> {{$adiantamento->id}} </td>	
+                                            <td> {{$adiantamento->created_at->format('d/m/Y')}}  </td>
+                                            <td> {{$adiantamento->descricao}} </td>
+                                            <td>  {{number_format($adiantamento->valor, 2 ,',' , '')}}  </td>
+                                        </tr>
+                                    @empty
+                                    @endforelse 
+                                    <tr style="color:red; font-size:20px;font-weight: bold;">
+                                        <td></td><td></td>
+                                        <td> TOTAL </td>
+                                        <td> R$ {{number_format( $model->AdiantamentosSemSalario()->sum('valor') , 2 ,',' , '')}} </td>
+                                    </tr>
+                                </tbody>					
+                            </table>
+                        </div>					
+                    </div>				 
                 </div>
+            </section>	
+    
+    
+    
+            
+            <section class="text-center relatorio"> 
+                <div class="col-12 col-sm-12 comissoes" style="margin-bottom:10px; ">
+                    <div class="box">
+                        <div class="box-header">
+                            <h1 class="box-title"> RESUMO </h1>
+                        </div>
+                        <div class="box-body no-padding">
+                            <table class="table table-condensed text-center table-striped">
+                                <thead>	
+                                    <tr>
+                                        <th> Total de Comissões  </th>
+                                        <th> Total de Adiantamento </th>
+                                        <th> Valor a Receber </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>									
+                                    <tr style="font-size:20px;font-weight: bold;">
+                                        <td style="color:green;">  R$ {{number_format( $model->valorBrutoSalario() , 2 ,',' , '')}}</td>
+                                        <td style="color:red;">  R$ {{number_format( $model->AdiantamentosSemSalario()->sum('valor') , 2 ,',' , '')}} </td>
+                                        <td style="color:blue;">  R$ {{number_format( $model->valorBrutoSalario() - $model->AdiantamentosSemSalario()->sum('valor') , 2 ,',' , '') }} </td>										
+                                    </tr>
+                                </tbody>					
+                            </table>
+                        </div>					
+                    </div>				 
+                </div>
+            </section>	
+    
+            
+                <section class="text-center relatorio"> 
+                    <div class="col-12 col-sm-12 comissoes" style="margin-bottom:10px; ">
+                        <div class="box">						
+                            <div class="box-footer align-right">
+                                    <button type="button" class="btn btn-default"  
+                                            onclick="modelShow(  {{$model->id}} , '{{ route('funcionarios.ajax.index') }}' , function(data){	document.getElementById('div-pagina').innerHTML = data ; }); " > 
+                                        <i class="fa fa-reply"></i> Voltar 
+                                    </button> 
+                                @if($model->valorBrutoSalario() - $model->AdiantamentosSemSalario()->sum('valor') > 0 )
+                                    @permissao('salario-cadastrar')
+                                        <button  style="margin-left: 5px;" class="btn btn-success btn" onclick="funcionario_pagar_salario( '{{ route('salario.ajax.cadastrar' , $model->id ) }}'   )" title="Pagar Salário">
+                                            <i class="fa fa-plus"></i> PAGAR SALÁRIO
+                                        </button>
+                                    @endpermissao 
+                                @endif
+                            </div>				
+                        </div>				 
+                    </div>
+                </section>
+            
                 
-                <hr>
-
-			@empty
-										
-					<p>Nenhum usuario encontrado</td>
-				
-			@endforelse
-        </div> 
-		
-
-
-
-		<div class="col-12 col-sm-12 placeholder">
-			<br>
-			<a class="btn btn-success" href='{{route("salario.createSalario", $funcionario->id)}}' class="">Cadastrar</a>
-        </div> 
-			
-    </section>
-
-
-
-		
-
-@endsection
+    
+        </div>
+    </section>			

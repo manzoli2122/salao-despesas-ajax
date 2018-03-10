@@ -72,6 +72,43 @@
 		$(document).ready(function() {
 			modelIndexDataTableFunction();
 		});
+
+
+
+
+
+
+		window.funcionario_pagar_salario = function( url , funcSucesso = function() {} , funcError = function() {} ) {			
+			alertProcessando();
+			var token = document.head.querySelector('meta[name="csrf-token"]').content;
+			$.ajax({
+				url: url ,
+				type: 'post',
+				data: { _token: token },
+				success: function(retorno) {
+					alertProcessandoHide();							
+					if (retorno.erro) {	
+						toastErro( retorno.msg );						
+						funcError();             
+					} 
+					else {
+						document.getElementById("div-pagina").innerHTML = retorno.data ;
+						funcSucesso();	
+					}											
+				},
+				error: function(erro) {
+					alertProcessandoHide();
+					toastErro("Ocorreu um erro");
+					console.log(erro);
+				}
+			});		
+		}
+		
+
+
+
+
+
 	</script>
 
 
