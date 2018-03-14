@@ -21,7 +21,7 @@
 					<table class="table table-bordered table-striped table-hover" id="datatable">
 						<thead>
 							<tr>
-								<th pesquisavel style="max-width:20px">ID</th>
+								<th pesquisavel style="max-width:35px">ID</th>
 								<th pesquisavel style="max-width:100px">Tipo</th>
 								<th pesquisavel style="max-width:150px">Categoria</th>
 								<th  >Descrição</th>
@@ -53,7 +53,7 @@
 					url:'{{ route('despesas.ajax.getDatatable') }}'
 				},
 				columns: [
-					{ data: 'id', name: 'id' },
+					{ data: 'id', name: 'id' ,  visible: @perfil('Admin') true @else false  @endperfil },
 					{ data: 'tipo', name: 'tipo' },
 					{ data: 'categoria', name: 'categoria' },
 					{ data: 'descricao', name: 'descricao' },
